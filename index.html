@@ -90,7 +90,19 @@ section{padding-block:64px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
 .card .ph{aspect-ratio:4/3;background:var(--tile);position:relative;overflow:hidden;max-width:100%}
+.card .ph{display:block;width:100%;border:0;padding:0;cursor:zoom-in}
 .card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.card .ph img.fit{object-fit:contain;background:#fff;padding:8px}
+.card .ph .count{position:absolute;right:8px;bottom:8px;background:rgba(15,25,55,.78);color:#fff;font:600 12.5px/1 var(--body);padding:6px 9px;border-radius:999px}
+.lb{border:0;padding:0;background:transparent;max-width:min(960px,100vw - 24px);width:100%;color:#fff}
+.lb::backdrop{background:rgba(8,12,28,.88)}
+.lb figure{margin:0;display:grid;gap:10px}
+.lb img{width:100%;max-height:78vh;object-fit:contain;background:#fff;border-radius:8px}
+.lb .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.lb figcaption{font:600 16px/1.3 var(--body)}
+.lb button{font:600 15px/1 var(--body);border-radius:6px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.08);color:#fff;padding:10px 14px;cursor:pointer}
+.lb .go{background:var(--red);border-color:var(--red)}
+.lb.one #lbPrev,.lb.one #lbNext{display:none}
 .card:hover .ph img{transform:scale(1.04)}
 @media (prefers-reduced-motion:reduce){.card .ph img{transition:none}}
 .ph .alt{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;font-family:var(--display);font-size:22px;color:var(--muted);
@@ -293,29 +305,41 @@ footer a{opacity:.9}
 
 <div class="mbar"><a class="btn ghost" href="tel:+13035238517">Call / text</a><a class="btn red" href="#quote" data-quote="">Get a quote</a></div>
 
+<dialog class="lb" id="lb" aria-label="Product photos">
+  <figure>
+    <img id="lbImg" alt="">
+    <div class="bar"><figcaption id="lbCap"></figcaption>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="lbPrev" aria-label="Previous photo">‹ Prev</button><button type="button" id="lbNext" aria-label="Next photo">Next ›</button><button type="button" class="go" id="lbQuote">Get a quote</button><button type="button" id="lbClose" aria-label="Close">Close</button></div>
+    </div>
+  </figure>
+</dialog>
 <script>
 "use strict";
-const IMG = "https://lh7-us.googleusercontent.com/sitesv-images-rt/";
+const IMG = "img/";
 // [name, group, quote-form product, short description, image id]
 const P = [
-  ["Mountain Glass Awards","Awards & trophies","Custom Awards and Trophies","Glass awards cut with Colorado peaks.","AMxu72sYSbvFGRTZ658O5lKJWfDun7kwuucaRum1PG9Szhb3Jph_M5f5RQphWwEfVA2luTMaT-16Fq-gpXGTxarfDxg2on3PmfCldINccaiIt6O4vC-IT5TvPUk54GfpvxIitDmwoslz7sLEOpQYvYOkEoTa_RcHM8CuTMem6vs3y0sSXzYkIU4uluNSrjmZZzg"],
-  ["“Colorado Line” Awards","Awards & trophies","Custom Awards and Trophies","Our own Colorado-themed designs.","AMxu72vc1LdlWMADqsuaHDib154S20LFK7h8GYIBBdhaZUWzITuQLaig9fc4Bu7IKd7Ls4RvEKRM1yfdnw4ziaK0WHck1ccF-bPJvJ-mZZJy-iyeBlwFwLTelCz1GN_MYMrDGxIkH2VtANSa6ac4N8ap-J3uIH1v-G3w-P_syltQ8yeiFTRr1Gdl2o07xll05NxrmbA8_TlcrVjkQArpuk5Yvf9e9knlLsOuXC3_VetU"],
-  ["Art Glass","Awards & trophies","Custom Awards and Trophies","Colored art glass, engraved to order.","AMxu72vksR3szxlTPKPmZclOt4U8LYjtkrac284lWOmbIcDg5wFkt-FxMovGU70BZ-zJR5PD4kltwNPVXrJS3j6V3-kTg8f_WDSZa4ei2-yTOCU0Q9uvgZGc1Pa9KbLSWLupq5rOfIQoPGXmoasMPVBEpDy0Y-0AZUxQpJhkrZchH-g9ud5npyz0qhccqx7oNmGE242RuydeA3tANJrbgdKHNO9Wz4lMkpeqt-OI0KYpaR4"],
-  ["Circle Glass Awards","Awards & trophies","Custom Awards and Trophies","Round glass awards for any occasion.","AMxu72vbSSclhTwglfouNYx7mkzVEmqg0cmHKLi_GO6UFw6DAlIiu_zMaRvJxdKRmFTdxPEQ5xapIrA7p4zY--apnLtSKNiGSacFoFIhTAnrvptKciJJyraDG0DphX3ydnN6hkHUCc1cfdRvKtc1wJ8NMtve9BM2g-HP7XOtAZYw6eDoRkPyFtmJGBoRSmnv2jFYUtcFgcPnttz8kY7TLtAfHUrJpY2MScbsYlJNAfRE"],
-  ["Trophy Cups","Awards & trophies","Custom Awards and Trophies","Classic cups for leagues and tournaments.","AMxu72s6cALFAE6Guo8E2lYl0xP7Flt9IPNGdV7tHvFjC-xKo7I7ZwERl12YG1TcDu9An6aeQGb7hYpAhcbW_LgNrz4q9c-2treHEVIMh7siI6xWXqWifAGAHfeSABJi9G7Mozf1XBrbR-RvYOzo_RioYuOwdZ1AvMxNeLKe4etH3Il5l0cfkCDc5kpyEunifp2nLhgTsiQe22hOMP2mYPNlAsCBEiQeGqlc8Z9tPV86E5I"],
-  ["Wood Medals","Awards & trophies","Custom Awards and Trophies","Laser-engraved wood medals on ribbons.","AMxu72sZRnivFqOwa1sg9eS0ssn0INc0kpPfPjaQvdl3_1Dx1IflDpVm2hseVBS6FJgZhNney3lsGXqqjNsa1YSirGePyQ6gONStgB2uJfJShDMfxUoF2l4b6nj2sVDQ6ohSL77GIECGwfIMZB55Ed9a6jiYERlYQavmKi7snPlynzASvRMCeu-X_0F2ZVcA_mQ"],
-  ["Sandblasted Glass Medals","Awards & trophies","Custom Awards and Trophies","Frosted glass medals with deep etching.","AMxu72vjdd0iDZPjWW3e4v9SCUzbo1z9e6_VV6J3VHdQJM8I30UgSyfAVeRByHBJEoKBfqzdhdlqa5uBQsE15BGDPCRc2pse9KLNfLrz6Y7qAZL7sqk0ECxEUNPUhmzvBwO5-xD2F49uPSlSoJ7Qlk8XXqfemu6Nx2lIaQo958rE04RniVIs83HJEjZ7rtKjwgRGYCsvVKYmhi6FE43hU9xVq1XgTstZAgcdWYj9_R7dCas"],
-  ["Custom Plaques","Plaques","Plaques and Recognition","Service, appreciation and achievement plaques.","AMxu72tbjh5vn5o0BtXtCtYJTM0aViL6TlMiv_fRogHpdDnGCYFyrZ1u6Gkw23AO5BdEzBSoM7I715-gn75J_8lI0y3x2LmiSWSE5tNXFu9zBB20Y4X164ZbEPzREUeHPp8mtoRZC9y-9daafRpcEZ93rweCBEyx8bvkY8k5ou9uHJRfJ-XPYy1Ytzcf3Qi-SZ80VqlNHCXVp4Nt9y54HKORL1Xs54nuDuUQG17hILZi4hQ"],
-  ["Certificate Plaques","Plaques","Plaques and Recognition","Mount a certificate under glass or acrylic.","AMxu72sHV5MdCJQ7A0JLYE69eUEKNzTzVKEOsO3i9LWT6f4Pr6RYDkXR6xN2gSJ7GKFnLzTFAqpfGWum47X8pjMEwc_ijCLfo0K4KrkoXp6FSO6KwuMPnQpWX_nX8u9MAmuvMjQGJohAnhOoapljL5lBuUkAmj5O_jkK1P6lF1DdGvM4Lc122jhrcdgOYLyYVipFTokyInt4rv5k3wCoBYwa27-9QplX60tv2VQboikp"],
-  ["Military Plaques","Plaques","Plaques and Recognition","Shadow boxes, retirements and unit plaques.","AMxu72vdxcAuzXhkiZKZtjmiYwG9qDMFy8Ous85lFLr3PzVBb4ewRNF4G5uatVJv8N9tIPtDhlIN8SrzZRT7P8kR1Lan1KjehXaNYMh0M5-jA9vbzP8hTBQDeg3s4WuOSzbL2l5LGzt6K_GfEWsm2xe2a5_eXE2_YDoTnINzuNSrIxs4f9cmOHtQVSMTnSZXx5Aulxw99S3SrAjIqRNw1QP13tKJ4bQZO70I8LMFP0DJyJk"],
-  ["Perpetual Plaques","Plaques","Plaques and Recognition","Add a new winner's name every year.","AMxu72vLeqOyLAZkWm21ewaviwqq-izbo47hck-0feJtJVb-LJx5lNUVW5jl6dJzFKGQiH6C3c4hL1TrXJUgm5tB0C_N7yQro0vuZQTB0XU3MC8qdtopunLayfASlAke9ja5-2bHjDXUe4YC1xYXkLeSupVqC-_jgLKAiQ-k2gJYtqv7azrWddx0oGO-_hqRCZideb4uSLoawDaV6dDKTPqRzlA3YuULf1IrrtYGSHPAhkI"],
-  ["Jewelry Boxes","Gifts & engraving","Other / Not Sure","Engraved keepsake boxes for gifts.","AMxu72v0vpPbq9u0As7v5OIz-faNe7hmS0FZeyg2_0i_r7hwysFG2P0ysRxV-OKSVkOPSa9cyOCuxrfjcq7SWp_Ot-3kfAJx8WHowoOP_M_TLmCuNQOJ45rRdTH_OliGWQt6xHoCLfeW4lC_bnqrgkZywY5NWn2-4JPSiI2sukF71O6LlEGRI_XzTr4KBTVMGpNmzXNEM_bRswmfnuItTmNfr31SrUBWWwPaHLaRdrtt_8U"],
-  ["Name Badges","Badges & coins","Name Badges","Magnetic or pin-back badges for staff.","AMxu72u0sgYhojdeK-aLlLpbXmyEt-TMAjuVjwp7AuYFJLaaC8lWlsfMjihp-aa-E1u18arC677TsPMwel93zsxy8vs74r4nSKHIjgb5ZdwlELzT6CfNn60A9oMPGlPhSHpfK3EiaoCe2JYrsnTEz-8oT9UTqj-5-iwyoBwtSkdHtsGwfNmCBUjXBPEW6sD930D23-TZHBi1PcFvbctNPQnPtu3Krhn9qRl3wLa4L8jbcso"],
-  ["Challenge Coins","Badges & coins","Challenge Coins and Medallions","Custom coins for units, agencies and teams.","AMxu72uWA2psk_IVDuAUah6dTXJbYECXMmtu0xbm_ru4rQklkhxaonFXVVtdnN47UzV5fuDF8UarNV-ih5HiK8lQ1A5M93RE5i7NhGDXt_xnXhmThlRDuiWoyPN8ZjT_Gsz5VMfsfo9j6SE7zGahvA5yfzuhIqPZT6emnJw88wW3SAbKze37xXPQKloBRvDnELMQ5nZowlwy348HMEplvEYhOyAtYc1x85bWElJ5_EpdwNQ"],
-  ["Wine Bottle Engraving","Gifts & engraving","Custom Engraving / Industrial Marking","Etched bottles for gifts and events.","AMxu72sQWdhiYlgK-fo69AHx1YVgQ9Q3uLJj3CqYBWnIDbWj1kdMJL6Kpsdc4CjwlbvLcRjTSQKf_PEIDoqH1rRpYw_EW0WoUgQI5OsfV0fFhWVIeQP7-1x-tMLYMDROnCprVfeLeUL9U3AM8b6x9xx1eQeWIkjuyemdpb25ym5ipvLeUjJ5gz-kBwthQNBKeOI"],
-  ["Knife Engraving","Gifts & engraving","Custom Engraving / Industrial Marking","Names, dates and logos on blades.","AMxu72v0iDiHbq5__cAg_tQJJy19hry1T4UeASSpZicqw3eaAvoGvj1W3Ha2cr3XmwVnIzp3HefOBBkZjzEUpkxxISOwvFwwBWcUDQerBLSof8lVrX-Mw6uoDse9fHuoxnh4jj3u1qZkeRM9DPKh5w3SZ1fTKgiyj2NR_GdaNsYeOaVZbw-m12GCOABf2QVmrzGDA-Ika6aFVOP3X9Jk_JvQkcflPQxzpeLtx8x43t95"],
-  ["Signage & Industrial Engraving","Gifts & engraving","Custom Engraving / Industrial Marking","Door signs, equipment tags and panels.","AMxu72vyTRVC7de-BuBkHAr-n7huKhki_JhzkBEHAmZt_XlDEkWsYZTHkn8io1tnCRlCvgxepnPus0wVCT4xbKu_AJFQvp8kYE70XOG5rEp2JUd2FpOA6drA6uWhuS-IxG4axZR1qeAhC4Er9jJcSR4xsUNdVt3scYfXx5z5OJRx78e7Zp_Fvv2poEnHbNnLEZSlCrrUV5bHIjVPz0OStCuyJnaCdOJOFmJJ9UmLVWdMIlk"],
-  ["Promotional Products","Gifts & engraving","Promotional Products","Your logo on pens, drinkware and more.","AMxu72t7apo_TR7cSV0S2X7SPdnrYi_dLnbsMqhLzUXrb0AwabRDSKTxqKOaEeBGgVDNHcsM6s1AJyx9vMJx20Rbon-fx0dcLKhNcjJHXt_MiDNtCg8DGxgAYsbfSqLaFyrLB9K8B0LNtzi5Ay_baA4AyCNjduLfvdIQbsXQCAkm06z9g3h4zpNe_SF8vPtCVTs"]
+  ["Mountain Glass Awards", "Awards & trophies", "Custom Awards and Trophies", "Glass awards cut with Colorado peaks.", ["mountain-glass-awards-1.jpg", "mountain-glass-awards-2.jpg", "mountain-glass-awards-3.jpg", "mountain-glass-awards-4.jpg"]],
+  ["“Colorado Line” Awards", "Awards & trophies", "Custom Awards and Trophies", "Our own Colorado-themed designs.", ["colorado-line-awards-1.jpg"]],
+  ["Art Glass", "Awards & trophies", "Custom Awards and Trophies", "Colored art glass, engraved to order.", ["art-glass-1.jpg", "art-glass-2.jpg", "art-glass-3.jpg", "art-glass-4w.jpg"]],
+  ["Glass & Crystal Awards", "Awards & trophies", "Custom Awards and Trophies", "Jade and clear glass in dozens of shapes.", ["glass-crystal-awards-1.jpg", "glass-crystal-awards-2.jpg", "glass-crystal-awards-3.jpg", "glass-crystal-awards-4.jpg", "glass-crystal-awards-5.jpg", "glass-crystal-awards-6.jpg", "glass-crystal-awards-7.jpg", "glass-crystal-awards-8.jpg", "glass-crystal-awards-9.jpg", "glass-crystal-awards-10.jpg", "glass-crystal-awards-11.jpg", "glass-crystal-awards-12w.jpg", "glass-crystal-awards-13w.jpg", "glass-crystal-awards-14w.jpg"]],
+  ["Circle Glass Awards", "Awards & trophies", "Custom Awards and Trophies", "Round glass awards for any occasion.", ["circle-glass-awards-1.jpg"]],
+  ["Crystal Paperweights", "Awards & trophies", "Custom Awards and Trophies", "Faceted crystal, etched with your message.", ["crystal-paperweights-1w.jpg", "crystal-paperweights-2w.jpg"]],
+  ["Trophy Cups", "Awards & trophies", "Custom Awards and Trophies", "Classic cups for leagues and tournaments.", ["trophy-cups-1.jpg", "trophy-cups-2w.jpg", "trophy-cups-3w.jpg"]],
+  ["Wood Medals", "Awards & trophies", "Custom Awards and Trophies", "Laser-engraved wood medals on ribbons.", ["wood-medals-1.jpg"]],
+  ["Sandblasted Glass Medals", "Awards & trophies", "Custom Awards and Trophies", "Frosted glass medals with deep etching.", ["sandblasted-glass-medals-1.jpg"]],
+  ["Custom Plaques", "Plaques", "Plaques and Recognition", "Service, appreciation and achievement plaques.", ["custom-plaques-1.jpg", "custom-plaques-2.jpg", "custom-plaques-3w.jpg", "custom-plaques-4.jpg", "custom-plaques-5w.jpg", "custom-plaques-6w.jpg", "custom-plaques-7.jpg", "custom-plaques-8.jpg", "custom-plaques-9w.jpg", "custom-plaques-10w.jpg", "custom-plaques-11w.jpg", "custom-plaques-12w.jpg", "custom-plaques-13w.jpg"]],
+  ["Certificate Plaques", "Plaques", "Plaques and Recognition", "Mount a certificate under glass or acrylic.", ["certificate-plaques-1.jpg"]],
+  ["Military Plaques", "Plaques", "Plaques and Recognition", "Shadow boxes, retirements and unit plaques.", ["military-plaques-1.jpg"]],
+  ["Gavel Plaques", "Plaques", "Plaques and Recognition", "For board members, judges and auctioneers.", ["gavel-plaques-1w.jpg", "gavel-plaques-2.jpg", "gavel-plaques-3w.jpg"]],
+  ["Perpetual Plaques", "Plaques", "Plaques and Recognition", "Add a new winner's name every year.", ["perpetual-plaques-1.jpg", "perpetual-plaques-2.jpg", "perpetual-plaques-3w.jpg", "perpetual-plaques-4w.jpg"]],
+  ["Jewelry Boxes", "Gifts & engraving", "Other / Not Sure", "Engraved keepsake boxes for gifts.", ["jewelry-boxes-1.jpg"]],
+  ["Clocks & Picture Frames", "Gifts & engraving", "Other / Not Sure", "Engraved desk clocks and photo frames.", ["clocks-picture-frames-1w.jpg", "clocks-picture-frames-2.jpg", "clocks-picture-frames-3w.jpg", "clocks-picture-frames-4w.jpg", "clocks-picture-frames-5w.jpg"]],
+  ["Name Badges", "Badges & coins", "Name Badges", "Magnetic or pin-back badges for staff.", ["name-badges-1w.jpg", "name-badges-2w.jpg", "name-badges-3w.jpg"]],
+  ["Challenge Coins", "Badges & coins", "Challenge Coins and Medallions", "Custom coins for units, agencies and teams.", ["challenge-coins-1.jpg"]],
+  ["Wine Bottle Engraving", "Gifts & engraving", "Custom Engraving / Industrial Marking", "Etched bottles and crystal stoppers.", ["wine-bottle-engraving-1.jpg", "wine-bottle-engraving-2.jpg", "wine-bottle-engraving-3.jpg", "wine-bottle-engraving-4.jpg"]],
+  ["Knife Engraving", "Gifts & engraving", "Custom Engraving / Industrial Marking", "Names, dates and logos on blades.", ["knife-engraving-1.jpg", "knife-engraving-2.jpg", "knife-engraving-3.jpg"]],
+  ["Signage & Industrial Engraving", "Gifts & engraving", "Custom Engraving / Industrial Marking", "Door signs, equipment tags and panels.", ["signage-industrial-engraving-1.jpg"]],
+  ["Promotional Products", "Gifts & engraving", "Promotional Products", "Coasters, cheese boards, pen sets and more.", ["promotional-products-1.jpg", "promotional-products-2w.jpg", "promotional-products-3.jpg"]]
 ];
 const GROUPS = ["All", ...new Set(P.map(p => p[1]))];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -327,10 +351,22 @@ function drawFilters(){
 function drawGrid(){
   document.getElementById("grid").innerHTML = P.filter(p => group === "All" || p[1] === group).map(p => `
     <article class="card">
-      <div class="ph"><img src="${IMG + p[4]}=w640" alt="${esc(p[0])}" loading="lazy" onerror="this.parentNode.classList.add('noimg');this.remove()"><div class="alt" aria-hidden="true">${esc(p[0])}</div></div>
+      <button type="button" class="ph" data-gal="${esc(p[0])}" aria-label="See photos of ${esc(p[0])}"><img src="${IMG + p[4][0]}" alt="" loading="lazy" class="${fit(p[4][0])}" onerror="this.parentNode.classList.add('noimg');this.remove()"><div class="alt" aria-hidden="true">${esc(p[0])}</div>${p[4].length > 1 ? `<span class="count">${p[4].length} photos</span>` : ""}</button>
       <div class="bd"><h3>${esc(p[0])}</h3><p>${esc(p[3])}</p><button type="button" class="q" data-quote="${esc(p[0])}">Get a quote</button></div>
     </article>`).join("");
 }
+const fit = f => /w\.jpg$/.test(f) ? "fit" : "";
+const lb = document.getElementById("lb"), lbImg = document.getElementById("lbImg"), lbCap = document.getElementById("lbCap");
+let gal = null, gi = 0;
+function showLb(){ lbImg.src = IMG + gal[4][gi]; lbImg.alt = gal[0] + " photo " + (gi + 1); lbCap.textContent = gal[0] + (gal[4].length > 1 ? "  ·  " + (gi + 1) + " of " + gal[4].length : ""); lb.classList.toggle("one", gal[4].length < 2); }
+function openLb(name){ gal = P.find(p => p[0] === name); if (!gal) return; gi = 0; showLb(); lb.showModal(); }
+function step(d){ gi = (gi + d + gal[4].length) % gal[4].length; showLb(); }
+document.getElementById("lbPrev").onclick = () => step(-1);
+document.getElementById("lbNext").onclick = () => step(1);
+document.getElementById("lbClose").onclick = () => lb.close();
+document.getElementById("lbQuote").onclick = () => { lb.close(); choose(gal[0]); document.getElementById("quote").scrollIntoView(); };
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+lb.addEventListener("keydown", e => { if (e.key === "ArrowLeft") step(-1); if (e.key === "ArrowRight") step(1); });
 function choose(name){
   chosen = P.find(p => p[0] === name) || null;
   if (chosen) document.getElementById("f_need").value = chosen[0];
@@ -338,11 +374,13 @@ function choose(name){
 document.addEventListener("click", e => {
   const f = e.target.closest("[data-g]");
   if (f) { group = f.dataset.g; drawFilters(); drawGrid(); return; }
+  const gb = e.target.closest("[data-gal]");
+  if (gb) { openLb(gb.dataset.gal); return; }
   const q = e.target.closest("[data-quote]");
   if (q && q.dataset.quote) { e.preventDefault(); choose(q.dataset.quote); document.getElementById("quote").scrollIntoView(); }
 });
 document.getElementById("yr").textContent = new Date().getFullYear();
-document.getElementById("mosaic").innerHTML = ["Mountain Glass Awards","Challenge Coins","Military Plaques"].map(n => { const p = P.find(x => x[0] === n); return `<figure class="ph"><img src="${IMG + p[4]}=w900" alt="${esc(p[0])}" onerror="this.parentNode.classList.add('noimg');this.remove()"><div class="alt" aria-hidden="true"></div><figcaption>${esc(p[0])}</figcaption></figure>`; }).join("");
+document.getElementById("mosaic").innerHTML = ["Mountain Glass Awards","Challenge Coins","Trophy Cups"].map(n => { const p = P.find(x => x[0] === n); return `<figure class="ph"><img src="${IMG + p[4][0]}" alt="${esc(p[0])}" onerror="this.parentNode.classList.add('noimg');this.remove()"><div class="alt" aria-hidden="true"></div><figcaption>${esc(p[0])}</figcaption></figure>`; }).join("");
 drawFilters(); drawGrid();
 
 // Quote form: sends to Parker's email (with the logo attached), where Awards USA Books picks it up.
