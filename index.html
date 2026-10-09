@@ -260,7 +260,7 @@ footer a{opacity:.9}
           <label for="f_qty">How many?
             <input id="f_qty" name="How many" type="number" min="1" inputmode="numeric" required placeholder="25"></label>
           <label for="f_budget">What's your budget?
-            <select id="f_budget" name="Budget" required><option value="">Choose a range</option><option>Under $100</option><option>$100 to $250</option><option>$250 to $500</option><option>$500 to $1,000</option><option>$1,000 to $2,500</option><option>Over $2,500</option><option>Not sure yet</option></select></label>
+            <input id="f_budget" name="Budget" list="budgets" required autocomplete="off" placeholder="Type an amount, like $300, or pick one"><datalist id="budgets"><option value="Under $100"><option value="$100 to $250"><option value="$250 to $500"><option value="$500 to $1,000"><option value="$1,000 to $2,500"><option value="Over $2,500"><option value="Not sure yet"></datalist></label>
           <label class="full" for="f_due">When do you need it by?
             <input id="f_due" name="Needed by" type="date" required></label>
           <fieldset class="full">
